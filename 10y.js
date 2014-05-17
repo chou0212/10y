@@ -139,7 +139,8 @@
             notify('APP下载队列:\n' + getAppsName(), 4000)
         }
         req.space && (space = req.space);
-        alert('设置的间隔为' + space);
+        req.pushTest && initPushApp();
+        //alert('设置的间隔为' + space);
         init10y(space);
     });
 
