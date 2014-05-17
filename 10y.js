@@ -1,8 +1,8 @@
 /**
-* @fileoverview 10亿次下载自动推送插件
-* @author Butterfly
-* @date 2014-05-16
-*/
+ * @fileoverview 10亿次下载自动推送插件
+ * @author Butterfly
+ * @date 2014-05-16
+ */
 ;
 (function(win, $) {
 
@@ -21,7 +21,8 @@
         appList: [{
             name: '查找手机',
             appid: '1e4a6c3c95e045bc8f78299735fc31ba'
-        }]
+        }],
+        cache: {}
     }
 
     var space = 10000;
@@ -42,9 +43,9 @@
         })
     }
 
-    function getAppsName(){
+    function getAppsName() {
         var names = [];
-        userInfo.appList.forEach(function(item, index){
+        userInfo.appList.forEach(function(item, index) {
             names.push(item.name);
         })
         return names.join();
@@ -83,21 +84,31 @@
     }
 
     function initPushApp() {
-        var appList = userInfo.appList;
-        i = 0;
+        var appList = userInfo.appList,
+            i = 0;
 
         for (; i < appList.length; i++) {
+            var appid = appList[i].appid,
+                appname = appList[i].name;
+
             $.getJSON(DL_API, {
-                p0: appList[i].appid,
+                p0: appid,
                 p1: userInfo.device
-            }, function(data) {
+            }).done(function(data) {
                 if (data.error) {
-                    notify(data.message ? data.message : "推送失败，请重试", 10 * 1000);
+                    notify(data.message ? data.message : "推送失败，自动重试", 10 * 1000);
+                    userInfo.appList.push({name: appname, bappid: appid});
                 } else {
                     notify("应用已推送，请查看手机", 10 * 1000);
+                    userInfo.cache[appid] = appname;
                 }
+            }).fail(function() {
+                userInfo.appList.push({name: appname, bappid: appid});
             });
         }
+
+        //清空队列并追加失败列表
+        userInfo.appList.length = 0;
     }
 
     var timer;
@@ -107,18 +118,18 @@
             getCount().done(function(res) {
                 notify('当前下载数：' + res.reply + '\n点我前往APP下载页', 5000);
                 if (res.reply >= MAX_COUNT) {
-                    clearTimeout(timer); 
+                    clearTimeout(timer);
                 }
                 checkLogin(function() {
                     checkCount(res.reply) && initPushApp();
                 })
             })
         }, t)
-        checkLogin()
+        checkLogin();
     }
 
     chrome.extension.onMessage.addListener(function(req, sender, sendRes) {
-        if(req.appid) {
+        if (req.appid) {
             userInfo.appList.push(req);
             notify('APP下载队列:\n' + getAppsName(), 4000)
         }
