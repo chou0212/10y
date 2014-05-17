@@ -67,7 +67,7 @@
     }
 
     function checkCount(count) {
-        return MAX_COUNT - count < 1e4
+        return MAX_COUNT - count < 1e8
     }
 
     function checkLogin(callback) {
@@ -97,13 +97,19 @@
             }).done(function(data) {
                 if (data.error) {
                     notify(data.message ? data.message : "推送失败，自动重试", 10 * 1000);
-                    userInfo.appList.push({name: appname, bappid: appid});
+                    userInfo.appList.push({
+                        name: appname,
+                        bappid: appid
+                    });
                 } else {
                     notify("应用已推送，请查看手机", 10 * 1000);
                     userInfo.cache[appid] = appname;
                 }
             }).fail(function() {
-                userInfo.appList.push({name: appname, bappid: appid});
+                userInfo.appList.push({
+                    name: appname,
+                    bappid: appid
+                });
             });
         }
 
@@ -121,7 +127,7 @@
                     clearTimeout(timer);
                 }
                 checkLogin(function() {
-                    checkCount(res.reply) && initPushApp();
+                    checkCount(res.reply) && userInfo.appList.length && initPushApp();
                 })
             })
         }, t)
