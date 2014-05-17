@@ -25,7 +25,7 @@
         cache: {}
     }
 
-    var space = 10000;
+    var space = 10000, timer;
 
     var createNotify = (function() {
         var notifications = win.webkitNotifications;
@@ -67,7 +67,7 @@
     }
 
     function checkCount(count) {
-        return MAX_COUNT - count < 1e8
+        return MAX_COUNT - count < 1e4
     }
 
     function checkLogin(callback) {
@@ -117,7 +117,6 @@
         userInfo.appList.length = 0;
     }
 
-    var timer;
     win.init10y = function(t) {
         timer && clearTimeout(timer);
         timer = setInterval(function() {
