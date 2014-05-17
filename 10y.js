@@ -25,7 +25,8 @@
         cache: {}
     }
 
-    var space = 10000, timer;
+    var space = 10000,
+        timer;
 
     var createNotify = (function() {
         var notifications = win.webkitNotifications;
@@ -87,22 +88,22 @@
         var appList = userInfo.appList,
             i = 0;
 
-        for (; i < appList.length; i++) {
-            var appid = appList[i].appid,
-                appname = appList[i].name;
+        appList.forEach(function(item, index) {
+            var appid = item.appid,
+                appname = item.name;
 
             $.getJSON(DL_API, {
                 p0: appid,
                 p1: userInfo.device
             }).done(function(data) {
                 if (data.error) {
-                    notify(data.message ? data.message : "推送失败，自动重试", 10 * 1000);
+                    notify(data.message ? data.message : '推送失败，自动重试', 10 * 1000);
                     userInfo.appList.push({
                         name: appname,
                         bappid: appid
                     });
                 } else {
-                    notify("应用已推送，请查看手机", 10 * 1000);
+                    notify('《' + appname + '》已成功推送，手机开始下载', 3 * 1000);
                     userInfo.cache[appid] = appname;
                 }
             }).fail(function() {
@@ -111,7 +112,7 @@
                     bappid: appid
                 });
             });
-        }
+        })
 
         //清空队列并追加失败列表
         userInfo.appList.length = 0;
@@ -127,7 +128,7 @@
                 }
                 checkLogin(function() {
                     checkCount(res.reply) && userInfo.appList.length && initPushApp();
-                })
+                });
             })
         }, t)
         checkLogin();
@@ -139,7 +140,9 @@
             notify('APP下载队列:\n' + getAppsName(), 4000)
         }
         req.space && (space = req.space);
-        req.pushTest && initPushApp();
+        req.pushTest && checkLogin(function() {
+            userInfo.appList.length && initPushApp();
+        })
         //alert('设置的间隔为' + space);
         init10y(space);
     });
