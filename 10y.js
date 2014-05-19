@@ -125,6 +125,7 @@
                 notify('当前下载数：' + res.reply + '\n点我前往APP下载页', 5000);
                 if (res.reply >= MAX_COUNT) {
                     clearTimeout(timer);
+                    return;
                 }
                 checkLogin(function() {
                     checkCount(res.reply) && userInfo.appList.length && initPushApp();
